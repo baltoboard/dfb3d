@@ -1,0 +1,13 @@
+The dfb3d package contains a basic Wavefront .obj based on df_knuckles
+that can be used to test and demonstrate events and rendering DirectFB
+features. The source code of these examples is provided under the
+terms of the MIT license. See the file COPYING for details.
+
+The package also ships sample Wavefront .obj files that will be installed into
+${prefix}/share/directfb-examples.
+
+After installation the dfb3d demo can be run:
+
+   with no parameter, will run the original skull provided by df_knuckles code
+
+   with "--obj3d <path_to_file_Wavefront_.obj>", will parse and run the .obj
