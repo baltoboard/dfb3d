@@ -1,6 +1,6 @@
 ## Makefile.am for DFB3D/data
 
-examplesdatadir = @DATADIR@
+examplesdatadir = @DATADIR@/3d
 
 examplesdata_DATA = \
 	coke.obj		\
