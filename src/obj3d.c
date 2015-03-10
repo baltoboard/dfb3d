@@ -2,6 +2,7 @@
    Written by Pierluigi Passaro <info@phoenixsoftware.it>
 */
 
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +39,7 @@ static void SetMaxCoordinate(void)
   }
 }
 
-static void ParseObj3d(FILE* fp)
+static void ParseObj3d(FILE* fp, char* Obj3dFilename)
 {
   char line[OBJ3D_LINE_LEN_MAX];
   char* pch = NULL;
@@ -59,15 +60,25 @@ static void ParseObj3d(FILE* fp)
   Obj3dVerticies = calloc(Obj3dVerticiesCount, sizeof(Vertex));
   Obj3dTriangles = calloc(Obj3dTrianglesCount, sizeof(Triangle));
 
+  printf("Found %dv, %dt\n", Obj3dVerticiesCount, Obj3dTrianglesCount);
+
   /* round 2: rescan the file to populate vertex and triangle */
-  fseek(fp, 0, SEEK_SET);
+  if (fseek(fp, 0, SEEK_SET) != 0) {
+    printf("%s %d: fseek error %d, trying reopening\n", __func__, __LINE__, errno);
+    fclose(fp);
+    fp = fopen(Obj3dFilename, "r");
+    if (fp == NULL) {
+      printf("%s %d: error %d reopening %s\n", __func__, __LINE__, errno, Obj3dFilename);
+      exit(0);
+    }
+  }
   while (fgets(line, OBJ3D_LINE_LEN_MAX, fp) != NULL) {
     pch = strtok(line, OBJ3D_TOKEN);
     if (pch == NULL)
       continue;
     else if (strcmp(pch, "v") == 0) {
       if (vertex == Obj3dVerticiesCount) {
-        printf("%s %d: ignoring unexpected line %s\n", __func__, __LINE__, line);
+        printf("Found %s %d: ignoring unexpected line %s\n", __func__, __LINE__, line);
         continue;
       }
       Obj3dVerticies[vertex].x = atof(strtok(NULL, OBJ3D_TOKEN));
@@ -85,6 +96,9 @@ static void ParseObj3d(FILE* fp)
       triangle++;
     }
   }
+
+  printf("Loaded %dv, %dt\n", vertex, triangle);
+
 }
 
 int LoadObj3d(char* Obj3dFilename)
@@ -99,7 +113,7 @@ int LoadObj3d(char* Obj3dFilename)
     return -1;
   }
 
-  ParseObj3d(fp);
+  ParseObj3d(fp, Obj3dFilename);
   fclose(fp);
   SetMaxCoordinate();
 
